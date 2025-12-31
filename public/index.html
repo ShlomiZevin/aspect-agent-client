@@ -895,7 +895,7 @@ const sendMessage = async (messageText) => {
   showTypingIndicator();
 
   try {
-    const res = await fetch('https://finance-1-dot-conquer-game-server.lm.r.appspot.com/api/finance-assistant', {
+    const res = await fetch('https://aspect-agents.oa.r.appspot.com/api/finance-assistant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
