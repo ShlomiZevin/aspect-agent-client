@@ -21,6 +21,12 @@
           </div>
         </div>
         <div class="header-right">
+          <button class="new-chat-btn" id="new-chat-btn" style="display: none;" title="Start new chat">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <span>New Chat</span>
+          </button>
           <div class="client-logo-section">
             <div class="client-logo-container" id="client-logo-container">
               <img src="" alt="Client Logo" class="client-logo-img" id="client-logo-img" style="display: none;" />
@@ -339,6 +345,33 @@ header {
 .remove-logo-btn svg {
   width: 14px;
   height: 14px;
+}
+
+.new-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-light);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.new-chat-btn:hover {
+  background: var(--surface);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.new-chat-btn svg {
+  width: 18px;
+  height: 18px;
 }
 
 .theme-toggle {
@@ -731,6 +764,16 @@ header {
     height: 12px;
   }
 
+  .new-chat-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .new-chat-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
   .theme-toggle {
     width: 40px;
     height: 40px;
@@ -808,6 +851,7 @@ localStorage.setItem('finance_conversation_id', conversationId);
 
 let loadingMessageEl = null;
 let hasStartedChat = false;
+const newChatBtn = document.getElementById('new-chat-btn');
 
 // Theme toggle functionality
 const themeToggle = document.getElementById('theme-toggle');
@@ -952,6 +996,8 @@ const addMessage = (text, sender = 'bot') => {
       setTimeout(() => welcomeSection.remove(), 300);
     }
     hasStartedChat = true;
+    // Show the "New Chat" button when chat starts
+    newChatBtn.style.display = 'flex';
   }
 
   const msg = document.createElement('div');
@@ -1025,6 +1071,22 @@ quickButtons.forEach(btn => {
     const question = btn.getAttribute('data-question');
     sendMessage(question);
   });
+});
+
+// New Chat button functionality
+newChatBtn.addEventListener('click', () => {
+  // Clear all messages
+  const messages = chatContainer.querySelectorAll('.message');
+  messages.forEach(msg => msg.remove());
+
+  // Reset conversation
+  hasStartedChat = false;
+  newChatBtn.style.display = 'none';
+
+  // Generate new conversation ID
+  const newConversationId = crypto.randomUUID();
+  localStorage.setItem('finance_conversation_id', newConversationId);
+  location.reload(); // Reload to show welcome screen
 });
 
 // Focus input on load
