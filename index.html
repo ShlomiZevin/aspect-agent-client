@@ -23,16 +23,23 @@
         <div class="header-right">
           <div class="client-logo-section">
             <div class="client-logo-container" id="client-logo-container">
-              <img src="img/zer4u-logo.png" alt="Client Logo" class="client-logo-img" id="client-logo-img" style="display: none;" />
-              <label for="logo-upload" class="upload-label">
+              <img src="" alt="Client Logo" class="client-logo-img" id="client-logo-img" style="display: none;" />
+              <label for="logo-upload" class="upload-label" id="upload-label">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="17 8 12 3 7 8"></polyline>
                   <line x1="12" y1="3" x2="12" y2="15"></line>
                 </svg>
                 <span>Upload Logo</span>
+                <span class="logo-hint">240×120px recommended</span>
               </label>
-              <input type="file" id="logo-upload" accept="image/*" style="display: none;" />
+              <button class="remove-logo-btn" id="remove-logo-btn" style="display: none;" title="Remove logo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+              <input type="file" id="logo-upload" accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp" style="display: none;" />
             </div>
           </div>
           <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
@@ -250,8 +257,8 @@ header {
 }
 
 .client-logo-container {
-  width: 120px;
-  height: 60px;
+  width: 140px;
+  height: 70px;
   border: 2px dashed var(--border);
   border-radius: 8px;
   display: flex;
@@ -259,7 +266,7 @@ header {
   justify-content: center;
   background: var(--surface-light);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.3s ease;
 }
 
@@ -270,6 +277,7 @@ header {
 
 .client-logo-img {
   width: 100%;
+  height: 100%;
   object-fit: contain;
   padding: 8px;
 }
@@ -278,12 +286,14 @@ header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   cursor: pointer;
   color: var(--text-secondary);
-  font-size: 12px;
-  padding: 8px;
+  font-size: 11px;
+  padding: 6px;
   transition: color 0.3s ease;
+  text-align: center;
+  width: 100%;
 }
 
 .upload-label:hover {
@@ -293,6 +303,42 @@ header {
 .upload-label svg {
   width: 20px;
   height: 20px;
+}
+
+.logo-hint {
+  font-size: 8px;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.remove-logo-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.9);
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.remove-logo-btn:hover {
+  background: rgb(220, 38, 38);
+  transform: scale(1.1);
+}
+
+.remove-logo-btn svg {
+  width: 14px;
+  height: 14px;
 }
 
 .theme-toggle {
@@ -663,11 +709,26 @@ header {
 
   .upload-label {
     font-size: 10px;
+    padding: 4px;
   }
 
   .upload-label svg {
     width: 16px;
     height: 16px;
+  }
+
+  .logo-hint {
+    font-size: 8px;
+  }
+
+  .remove-logo-btn {
+    width: 20px;
+    height: 20px;
+  }
+
+  .remove-logo-btn svg {
+    width: 12px;
+    height: 12px;
   }
 
   .theme-toggle {
@@ -778,26 +839,62 @@ themeToggle.addEventListener('click', () => {
   }
 });
 
-// Logo upload functionality (mockup - always loads zer4u-logo.png)
+// Logo upload functionality
 const logoUpload = document.getElementById('logo-upload');
 const clientLogoImg = document.getElementById('client-logo-img');
-const uploadLabel = document.querySelector('.upload-label');
+const uploadLabel = document.getElementById('upload-label');
+const removeLogoBtn = document.getElementById('remove-logo-btn');
 
-// Check if logo was previously uploaded
-const logoUploaded = localStorage.getItem('client_logo_uploaded');
-if (logoUploaded === 'true') {
+// Check if logo was previously uploaded and load from localStorage
+const savedLogoData = localStorage.getItem('client_logo_data');
+if (savedLogoData) {
+  clientLogoImg.src = savedLogoData;
   clientLogoImg.style.display = 'block';
   uploadLabel.style.display = 'none';
+  removeLogoBtn.style.display = 'flex';
 }
 
+// Handle file selection
 logoUpload.addEventListener('change', (e) => {
   if (e.target.files && e.target.files[0]) {
-    // Mockup: Always show zer4u-logo.png regardless of selected file
-    clientLogoImg.src = 'img/zer4u-logo.png';
-    clientLogoImg.style.display = 'block';
-    uploadLabel.style.display = 'none';
-    localStorage.setItem('client_logo_uploaded', 'true');
+    const file = e.target.files[0];
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Logo file size should be less than 2MB');
+      return;
+    }
+
+    // Read and display the selected image
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageData = event.target.result;
+      clientLogoImg.src = imageData;
+      clientLogoImg.style.display = 'block';
+      uploadLabel.style.display = 'none';
+      removeLogoBtn.style.display = 'flex';
+
+      // Save to localStorage
+      localStorage.setItem('client_logo_data', imageData);
+    };
+    reader.readAsDataURL(file);
   }
+});
+
+// Handle logo removal
+removeLogoBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  // Clear the logo
+  clientLogoImg.src = '';
+  clientLogoImg.style.display = 'none';
+  uploadLabel.style.display = 'flex';
+  removeLogoBtn.style.display = 'none';
+  logoUpload.value = '';
+
+  // Remove from localStorage
+  localStorage.removeItem('client_logo_data');
 });
 
 // Format text with markdown-like styling
