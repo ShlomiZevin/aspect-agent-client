@@ -255,6 +255,17 @@ header {
   height: 100%;
   object-fit: contain;
   padding: 8px;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+  mix-blend-mode: multiply;
+}
+
+[data-theme="light"] .logo-img {
+  mix-blend-mode: normal;
+}
+
+.logo-icon:hover .logo-img {
+  opacity: 0.85;
 }
 
 .client-logo-section {
