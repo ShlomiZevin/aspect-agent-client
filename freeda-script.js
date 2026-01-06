@@ -9,8 +9,38 @@ const conversationId = localStorage.getItem('freeda_conversation_id') || crypto.
 localStorage.setItem('freeda_conversation_id', conversationId);
 
 let loadingMessageEl = null;
+let thinkingContainerEl = null;
 let hasStartedChat = false;
 const newChatBtn = document.getElementById('new-chat-btn');
+
+// Mockup thinking steps - varied based on query type
+const thinkingStepsPool = [
+  [
+    "Understanding your question with care",
+    "Accessing trusted medical knowledge",
+    "Considering your unique needs",
+    "Preparing personalized guidance",
+    "Ensuring accuracy and empathy"
+  ],
+  [
+    "Analyzing symptom patterns",
+    "Reviewing wellness research",
+    "Connecting to practical solutions",
+    "Crafting supportive advice"
+  ],
+  [
+    "Processing your health query",
+    "Consulting evidence-based resources",
+    "Tailoring recommendations for you",
+    "Preparing helpful insights"
+  ],
+  [
+    "Evaluating your wellness question",
+    "Gathering menopause expertise",
+    "Formulating compassionate guidance",
+    "Ensuring clarity and support"
+  ]
+];
 
 // Theme toggle functionality
 const themeToggle = document.getElementById('theme-toggle');
@@ -132,15 +162,80 @@ const removeTypingIndicator = () => {
   }
 };
 
+// Show thinking indicator
+const showThinkingIndicator = () => {
+  // Remove welcome section on first message if needed
+  if (!hasStartedChat) {
+    const welcomeSection = document.querySelector('.welcome-section');
+    if (welcomeSection) {
+      welcomeSection.style.opacity = '0';
+      setTimeout(() => welcomeSection.remove(), 300);
+    }
+    hasStartedChat = true;
+    newChatBtn.style.display = 'flex';
+  }
+
+  // Select random thinking steps
+  const steps = thinkingStepsPool[Math.floor(Math.random() * thinkingStepsPool.length)];
+
+  thinkingContainerEl = document.createElement('div');
+  thinkingContainerEl.classList.add('thinking-container');
+  thinkingContainerEl.innerHTML = `
+    <div class="thinking-header">
+      <svg class="thinking-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 6v6l4 2"></path>
+      </svg>
+      <span>Thinking...</span>
+      <svg class="thinking-toggle expanded" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </div>
+    <div class="thinking-steps">
+      ${steps.map(step => `<div class="thinking-step">${step}</div>`).join('')}
+    </div>
+  `;
+
+  chatContainer.appendChild(thinkingContainerEl);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+
+  // Add click handler for toggle - use event delegation to persist after completion
+  const header = thinkingContainerEl.querySelector('.thinking-header');
+  header.addEventListener('click', function() {
+    const container = this.closest('.thinking-container');
+    const toggle = container.querySelector('.thinking-toggle');
+    container.classList.toggle('thinking-collapsed');
+    toggle.classList.toggle('expanded');
+  });
+};
+
+// Complete thinking indicator (mark as done, collapse it)
+const completeThinkingIndicator = () => {
+  if (thinkingContainerEl) {
+    thinkingContainerEl.classList.add('thinking-completed', 'thinking-collapsed');
+
+    const header = thinkingContainerEl.querySelector('.thinking-header span');
+    if (header) header.textContent = 'View thinking process';
+
+    const toggle = thinkingContainerEl.querySelector('.thinking-toggle');
+    if (toggle) toggle.classList.remove('expanded');
+
+    // Clear reference so we can show a new thinking indicator for next message
+    thinkingContainerEl = null;
+  }
+};
+
 // Send message to server with streaming
 const sendMessage = async (messageText) => {
   addMessage(messageText, 'user');
   input.value = '';
-  showTypingIndicator();
+
+  // Show thinking indicator
+  showThinkingIndicator();
 
   try {
-    const url = 'https://general-flex-dot-aspect-agents.oa.r.appspot.com/api/finance-assistant/stream';
-    //const url = 'http://localhost:3000/api/finance-assistant/stream';
+    //const url = 'https://general-flex-dot-aspect-agents.oa.r.appspot.com/api/finance-assistant/stream';
+    const url = 'http://localhost:3000/api/finance-assistant/stream';
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -154,17 +249,12 @@ const sendMessage = async (messageText) => {
       throw new Error('Network response was not ok');
     }
 
-    removeTypingIndicator();
-
-    // Create empty bot message for streaming
-    const botMessage = document.createElement('div');
-    botMessage.classList.add('message', 'bot');
-    chatContainer.appendChild(botMessage);
-
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let fullText = '';
     let buffer = '';
+    let botMessage = null;
+    let hasReceivedContent = false;
 
     const processChunk = async () => {
       const { done, value } = await reader.read();
@@ -188,6 +278,15 @@ const sendMessage = async (messageText) => {
           try {
             const parsed = JSON.parse(data);
             if (parsed.chunk) {
+              // First content received - complete thinking and create message
+              if (!hasReceivedContent) {
+                completeThinkingIndicator();
+                botMessage = document.createElement('div');
+                botMessage.classList.add('message', 'bot');
+                chatContainer.appendChild(botMessage);
+                hasReceivedContent = true;
+              }
+
               fullText += parsed.chunk;
               botMessage.textContent = fullText;
               chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -207,9 +306,11 @@ const sendMessage = async (messageText) => {
     await processChunk();
 
     // Apply formatting after all chunks received
-    botMessage.innerHTML = formatMessage(fullText);
+    if (botMessage) {
+      botMessage.innerHTML = formatMessage(fullText);
+    }
   } catch (err) {
-    removeTypingIndicator();
+    completeThinkingIndicator();
     addMessage("I'm sorry, I'm having trouble connecting right now. Please try again in a moment.", 'bot');
     console.error('Error:', err);
   }
