@@ -139,7 +139,7 @@ const sendMessage = async (messageText) => {
   showTypingIndicator();
 
   try {
-    const url = 'https://general-dot-aspect-agents.oa.r.appspot.com/api/finance-assistant/stream';
+    const url = 'https://general-flex-dot-aspect-agents.oa.r.appspot.com/api/finance-assistant/stream';
     //const url = 'http://localhost:3000/api/finance-assistant/stream';
     const res = await fetch(url, {
       method: 'POST',

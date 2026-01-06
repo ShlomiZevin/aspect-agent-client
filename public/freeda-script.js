@@ -139,7 +139,7 @@ const sendMessage = async (messageText) => {
   showTypingIndicator();
 
   try {
-    const url = 'https://general-dot-aspect-agents.oa.r.appspot.com/api/finance-assistant/stream';
+    const url = 'https://general-flex-dot-aspect-agents.oa.r.appspot.com/api/finance-assistant/stream';
     //const url = 'http://localhost:3000/api/finance-assistant/stream';
     const res = await fetch(url, {
       method: 'POST',
@@ -166,9 +166,9 @@ const sendMessage = async (messageText) => {
     let fullText = '';
     let buffer = '';
 
-    while (true) {
+    const processChunk = async () => {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) return;
 
       // Decode chunk and add to buffer
       buffer += decoder.decode(value, { stream: true });
@@ -182,14 +182,14 @@ const sendMessage = async (messageText) => {
         if (line.startsWith('data: ')) {
           const data = line.slice(6).trim();
           if (data === '[DONE]') {
-            break;
+            return;
           }
 
           try {
             const parsed = JSON.parse(data);
             if (parsed.chunk) {
               fullText += parsed.chunk;
-              botMessage.innerHTML = formatMessage(fullText);
+              botMessage.textContent = fullText;
               chatContainer.scrollTop = chatContainer.scrollHeight;
             } else if (parsed.error) {
               throw new Error(parsed.error);
@@ -199,7 +199,15 @@ const sendMessage = async (messageText) => {
           }
         }
       }
-    }
+
+      // Continue processing next chunk
+      await processChunk();
+    };
+
+    await processChunk();
+
+    // Apply formatting after all chunks received
+    botMessage.innerHTML = formatMessage(fullText);
   } catch (err) {
     removeTypingIndicator();
     addMessage("I'm sorry, I'm having trouble connecting right now. Please try again in a moment.", 'bot');
