@@ -497,6 +497,143 @@ header {
   30% { transform: translateY(-12px); }
 }
 
+/* Thinking Indicator */
+.thinking-container {
+  max-width: 75%;
+  margin: 16px 0;
+  align-self: flex-start;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 18px;
+  animation: slideIn 0.3s ease;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.thinking-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.3s ease;
+}
+
+.thinking-header:hover {
+  color: var(--primary-color);
+}
+
+.thinking-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--primary-color);
+  animation: spin 2s linear infinite;
+  flex-shrink: 0;
+}
+
+.thinking-icon.collapsed {
+  animation: none;
+}
+
+.thinking-toggle {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.thinking-toggle.expanded {
+  transform: rotate(180deg);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.thinking-steps {
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--text-secondary);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.thinking-steps::-webkit-scrollbar {
+  width: 5px;
+}
+
+.thinking-steps::-webkit-scrollbar-track {
+  background: var(--surface-light);
+  border-radius: 4px;
+}
+
+.thinking-steps::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.thinking-steps::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+.thinking-step {
+  padding: 7px 0;
+  padding-left: 24px;
+  position: relative;
+  opacity: 0;
+  animation: fadeInStep 0.4s ease forwards;
+}
+
+.thinking-step:before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--primary-color);
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.thinking-step:nth-child(1) { animation-delay: 0.1s; }
+.thinking-step:nth-child(2) { animation-delay: 0.2s; }
+.thinking-step:nth-child(3) { animation-delay: 0.3s; }
+.thinking-step:nth-child(4) { animation-delay: 0.4s; }
+.thinking-step:nth-child(5) { animation-delay: 0.5s; }
+.thinking-step:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeInStep {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.thinking-collapsed .thinking-steps {
+  display: none;
+}
+
+.thinking-completed .thinking-icon {
+  animation: none;
+  color: var(--success-color);
+}
+
+.thinking-completed .thinking-header {
+  color: var(--text-primary);
+  opacity: 0.75;
+}
+
+.thinking-completed .thinking-header:hover {
+  opacity: 1;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   header {
