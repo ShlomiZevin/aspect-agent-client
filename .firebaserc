@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "aspect-agents"
+    "default": "aspect-agents",
+    "freeda": "freeda-2b4af"
   }
 }

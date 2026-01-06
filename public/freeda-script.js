@@ -166,9 +166,9 @@ const sendMessage = async (messageText) => {
     let fullText = '';
     let buffer = '';
 
-    const processChunk = async () => {
+    while (true) {
       const { done, value } = await reader.read();
-      if (done) return;
+      if (done) break;
 
       // Decode chunk and add to buffer
       buffer += decoder.decode(value, { stream: true });
@@ -182,14 +182,14 @@ const sendMessage = async (messageText) => {
         if (line.startsWith('data: ')) {
           const data = line.slice(6).trim();
           if (data === '[DONE]') {
-            return;
+            break;
           }
 
           try {
             const parsed = JSON.parse(data);
             if (parsed.chunk) {
               fullText += parsed.chunk;
-              botMessage.textContent = fullText;
+              botMessage.innerHTML = formatMessage(fullText);
               chatContainer.scrollTop = chatContainer.scrollHeight;
             } else if (parsed.error) {
               throw new Error(parsed.error);
@@ -199,15 +199,7 @@ const sendMessage = async (messageText) => {
           }
         }
       }
-
-      // Continue processing next chunk
-      await processChunk();
-    };
-
-    await processChunk();
-
-    // Apply formatting after all chunks received
-    botMessage.innerHTML = formatMessage(fullText);
+    }
   } catch (err) {
     removeTypingIndicator();
     addMessage("I'm sorry, I'm having trouble connecting right now. Please try again in a moment.", 'bot');
