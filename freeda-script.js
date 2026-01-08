@@ -15,8 +15,8 @@ let thinkingContainerEl = null;
 let hasStartedChat = false;
 const newChatBtn = document.getElementById('new-chat-btn');
 
-//const baseURL = 'https://general-flex-dot-aspect-agents.oa.r.appspot.com';
-const baseURL = 'http://localhost:3000';
+const baseURL = 'https://general-flex-dot-aspect-agents.oa.r.appspot.com';
+//const baseURL = 'http://localhost:3000';
 
 // Mockup thinking steps - varied based on query type
 const thinkingStepsPool = [
