@@ -358,35 +358,38 @@ fileUploadBtn.addEventListener('click', () => {
 });
 
 fileInput.addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const files = Array.from(e.target.files);
+  if (files.length === 0) return;
 
-  // Show upload status
-  const uploadStatus = addMessage(`📄 Uploading "${file.name}" to knowledge base...`, 'bot');
+  // Process each file one by one
+  for (const file of files) {
+    // Show upload status for this file
+    const uploadStatus = addMessage(`📄 Uploading "${file.name}" to knowledge base...`, 'bot');
 
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
 
-    const url = baseURL + '/api/kb/upload';
-    
-    const res = await fetch(url, {
-      method: 'POST',
-      body: formData
-    });
+      const url = baseURL + '/api/kb/upload';
 
-    if (!res.ok) {
-      throw new Error('Upload failed');
+      const res = await fetch(url, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await res.json();
+
+      // Update status message for this file
+      uploadStatus.innerHTML = formatMessage(`✅ **File uploaded successfully!**\n\nFile: ${result.fileName}\nStatus: ${result.status}\nFile ID: ${result.fileId}`);
+
+    } catch (err) {
+      uploadStatus.innerHTML = formatMessage(`❌ **Upload failed**\n\nSorry, there was an error uploading "${file.name}". Please try again.`);
+      console.error('Upload error:', err);
     }
-
-    const result = await res.json();
-
-    // Update status message
-    uploadStatus.innerHTML = formatMessage(`✅ **File uploaded successfully!**\n\nFile: ${result.fileName}\nStatus: ${result.status}\nFile ID: ${result.fileId}`);
-
-  } catch (err) {
-    uploadStatus.innerHTML = formatMessage(`❌ **Upload failed**\n\nSorry, there was an error uploading your file. Please try again.`);
-    console.error('Upload error:', err);
   }
 
   // Clear file input
