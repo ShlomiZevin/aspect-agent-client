@@ -3,6 +3,8 @@ const chatContainer = document.getElementById('chat');
 const form = document.getElementById('chat-form');
 const input = document.getElementById('user-input');
 const quickButtons = document.querySelectorAll('.quick-btn');
+const fileUploadBtn = document.getElementById('file-upload-btn');
+const fileInput = document.getElementById('file-input');
 
 // Generate or retrieve conversation ID
 const conversationId = localStorage.getItem('freeda_conversation_id') || crypto.randomUUID();
@@ -12,6 +14,9 @@ let loadingMessageEl = null;
 let thinkingContainerEl = null;
 let hasStartedChat = false;
 const newChatBtn = document.getElementById('new-chat-btn');
+
+//const baseURL = 'https://general-flex-dot-aspect-agents.oa.r.appspot.com';
+const baseURL = 'http://localhost:3000';
 
 // Mockup thinking steps - varied based on query type
 const thinkingStepsPool = [
@@ -234,8 +239,7 @@ const sendMessage = async (messageText) => {
   showThinkingIndicator();
 
   try {
-    //const url = 'https://general-flex-dot-aspect-agents.oa.r.appspot.com/api/finance-assistant/stream';
-    const url = 'http://localhost:3000/api/finance-assistant/stream';
+    const url = baseURL + '/api/finance-assistant/stream';
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -346,6 +350,47 @@ newChatBtn.addEventListener('click', () => {
   const newConversationId = crypto.randomUUID();
   localStorage.setItem('freeda_conversation_id', newConversationId);
   location.reload(); // Reload to show welcome screen
+});
+
+// File upload functionality
+fileUploadBtn.addEventListener('click', () => {
+  fileInput.click();
+});
+
+fileInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Show upload status
+  const uploadStatus = addMessage(`📄 Uploading "${file.name}" to knowledge base...`, 'bot');
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const url = baseURL + '/api/kb/upload';
+    
+    const res = await fetch(url, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const result = await res.json();
+
+    // Update status message
+    uploadStatus.innerHTML = formatMessage(`✅ **File uploaded successfully!**\n\nFile: ${result.fileName}\nStatus: ${result.status}\nFile ID: ${result.fileId}`);
+
+  } catch (err) {
+    uploadStatus.innerHTML = formatMessage(`❌ **Upload failed**\n\nSorry, there was an error uploading your file. Please try again.`);
+    console.error('Upload error:', err);
+  }
+
+  // Clear file input
+  fileInput.value = '';
 });
 
 // Focus input on load
