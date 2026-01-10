@@ -497,6 +497,43 @@ header {
   box-shadow: 0 4px 16px rgba(217, 115, 152, 0.3);
 }
 
+.kb-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--surface-light);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.kb-toggle-wrapper:hover {
+  border-color: var(--primary-color);
+  background: var(--surface);
+}
+
+.kb-toggle-wrapper label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+#use-kb-toggle {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+}
+
+#use-kb-toggle:checked + label {
+  color: var(--primary-color);
+}
+
 .file-upload-btn:active {
   transform: scale(0.95);
 }

@@ -15,7 +15,7 @@ let thinkingContainerEl = null;
 let hasStartedChat = false;
 const newChatBtn = document.getElementById('new-chat-btn');
 
-const baseURL = 'https://general-flex-dot-aspect-agents.oa.r.appspot.com';
+const baseURL = 'https://general-flex-1-dot-aspect-agents.oa.r.appspot.com';
 //const baseURL = 'http://localhost:3000';
 
 // Mockup thinking steps - varied based on query type
@@ -239,13 +239,15 @@ const sendMessage = async (messageText) => {
   showThinkingIndicator();
 
   try {
+    const useKB = document.getElementById('use-kb-toggle').checked;
     const url = baseURL + '/api/finance-assistant/stream';
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: messageText,
-        conversationId: conversationId
+        conversationId: conversationId,
+        useKnowledgeBase: useKB
       })
     });
 
