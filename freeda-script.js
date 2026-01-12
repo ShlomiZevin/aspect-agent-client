@@ -10,13 +10,45 @@ const fileInput = document.getElementById('file-input');
 const conversationId = localStorage.getItem('freeda_conversation_id') || crypto.randomUUID();
 localStorage.setItem('freeda_conversation_id', conversationId);
 
+// User ID management
+let userId = localStorage.getItem('freeda_user_id');
+
 let loadingMessageEl = null;
 let thinkingContainerEl = null;
 let hasStartedChat = false;
 const newChatBtn = document.getElementById('new-chat-btn');
 
-const baseURL = 'https://general-flex-1-dot-aspect-agents.oa.r.appspot.com';
-//const baseURL = 'http://localhost:3000';
+//const baseURL = 'https://general-flex-1-dot-aspect-agents.oa.r.appspot.com';
+const baseURL = 'http://localhost:3000';
+
+// Initialize user ID
+async function initializeUserId() {
+  if (!userId) {
+    try {
+      const response = await fetch(`${baseURL}/api/user/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create user');
+      }
+
+      const data = await response.json();
+      userId = data.userId;
+      localStorage.setItem('freeda_user_id', userId);
+      console.log('✅ User ID created:', userId);
+    } catch (error) {
+      console.error('❌ Error creating user ID:', error);
+      // Continue without userId (anonymous)
+    }
+  } else {
+    console.log('✅ Using existing user ID:', userId);
+  }
+}
+
+// Initialize on page load
+initializeUserId();
 
 // Mockup thinking steps - varied based on query type
 const thinkingStepsPool = [
@@ -247,7 +279,8 @@ const sendMessage = async (messageText) => {
       body: JSON.stringify({
         message: messageText,
         conversationId: conversationId,
-        useKnowledgeBase: useKB
+        useKnowledgeBase: useKB,
+        userId: userId // Include user ID
       })
     });
 
