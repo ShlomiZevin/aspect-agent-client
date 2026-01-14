@@ -1,8 +1,8 @@
 // Knowledge Base Manager - Client-side Script with Real API Integration
 
 // API Configuration
-//const baseURL = 'https://aspect-agent-server-1018338671074.europe-west1.run.app';
-const baseURL = 'http://localhost:3000'; // Uncomment for local development
+const baseURL = 'https://aspect-agent-server-1018338671074.europe-west1.run.app';
+//const baseURL = 'http://localhost:3000'; // Uncomment for local development
 const AGENT_NAME = 'Freeda 2.0';
 
 // Theme toggle functionality
