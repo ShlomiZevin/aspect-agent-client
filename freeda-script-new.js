@@ -39,8 +39,7 @@ const freedaThinkingSteps = [
 const freedaAgent = new AgentBase({
   agentName: 'Freeda 2.0',
   storagePrefix: 'freeda_',
-  //baseURL: 'https://aspect-agent-server-1018338671074.europe-west1.run.app',
-  baseURL: 'http://localhost:3000',
+  baseURL: 'https://aspect-agent-server-1018338671074.europe-west1.run.app',
   thinkingSteps: freedaThinkingSteps,
   useKnowledgeBase: () => document.getElementById('use-kb-toggle').checked
 });

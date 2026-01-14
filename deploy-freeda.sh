@@ -5,9 +5,10 @@ echo "🌸 Deploying to Freeda project..."
 echo "📦 Copying Freeda files to public folder..."
 
 # Copy freeda.html and related files to public
+cp *.html public/
 cp freeda.html public/index.html
-cp freeda-styles.css public/
-cp freeda-script.js public/
+cp *.css public/
+cp *.js public/
 cp -r img public/
 
 echo "✅ Files copied"
