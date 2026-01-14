@@ -25,7 +25,8 @@ let hasStartedChat = false;
 const newChatBtn = document.getElementById('new-chat-btn');
 
 //const baseURL = 'https://general-flex-1-dot-aspect-agents.oa.r.appspot.com';
-const baseURL = 'http://localhost:3000';
+const baseURL = 'https://aspect-agent-server-1018338671074.europe-west1.run.app';
+//const baseURL = 'https://general-node-db-drizzle-1-dot-aspect-agents.oa.r.appspot.com';
 
 // Initialize user ID
 async function initializeUserId() {
