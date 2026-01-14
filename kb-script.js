@@ -351,7 +351,21 @@ function handleFileSelection(files) {
     selectedFilesDiv.style.display = 'block';
     selectedFilesList.innerHTML = '';
 
+    // Check for duplicates to show warnings
+    const existingFiles = selectedKB ? (selectedKB.files || []) : [];
+
     files.forEach((file, index) => {
+      // Check if this file has conflicts
+      const nameMatch = existingFiles.find(ef => ef.fileName === file.name);
+      const sizeMatch = existingFiles.find(ef => ef.fileSize === file.size && ef.fileName !== file.name);
+
+      let warningBadge = '';
+      if (nameMatch) {
+        warningBadge = '<span class="duplicate-badge same-name" title="File with same name exists">⚠️ Same Name</span>';
+      } else if (sizeMatch) {
+        warningBadge = '<span class="duplicate-badge same-size" title="File with same size exists">⚠️ Same Size</span>';
+      }
+
       const fileItem = document.createElement('div');
       fileItem.className = 'selected-file-item';
       fileItem.innerHTML = `
@@ -359,7 +373,7 @@ function handleFileSelection(files) {
           <span class="file-icon">${getFileIcon(file.name)}</span>
           <div>
             <div class="selected-file-name">${file.name}</div>
-            <div class="selected-file-size">${formatBytes(file.size)}</div>
+            <div class="selected-file-size">${formatBytes(file.size)} ${warningBadge}</div>
           </div>
         </div>
         <button class="remove-file-btn" onclick="removeFile(${index})">
@@ -386,6 +400,46 @@ document.getElementById('confirm-upload').addEventListener('click', async () => 
   if (filesToUpload.length === 0) {
     alert('Please select files to upload');
     return;
+  }
+
+  // Check for duplicate files
+  const existingFiles = selectedKB.files || [];
+  const duplicates = {
+    sameName: [],
+    sameSize: []
+  };
+
+  for (const file of filesToUpload) {
+    // Check for exact name match
+    const nameMatch = existingFiles.find(ef => ef.fileName === file.name);
+    if (nameMatch) {
+      duplicates.sameName.push(file.name);
+    }
+
+    // Check for same size (different name)
+    const sizeMatch = existingFiles.find(ef => ef.fileSize === file.size && ef.fileName !== file.name);
+    if (sizeMatch) {
+      duplicates.sameSize.push(`${file.name} (${formatBytes(file.size)})`);
+    }
+  }
+
+  // Show warning if duplicates found
+  if (duplicates.sameName.length > 0 || duplicates.sameSize.length > 0) {
+    let warningMsg = 'Warning: Duplicate files detected!\n\n';
+
+    if (duplicates.sameName.length > 0) {
+      warningMsg += `${duplicates.sameName.length} file(s) with same name already exist.\n`;
+    }
+
+    if (duplicates.sameSize.length > 0) {
+      warningMsg += `${duplicates.sameSize.length} file(s) with same size already exist.\n`;
+    }
+
+    warningMsg += '\nDo you want to upload anyway?';
+
+    if (!confirm(warningMsg)) {
+      return;
+    }
   }
 
   const tags = document.getElementById('file-tags').value

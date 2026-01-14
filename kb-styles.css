@@ -735,6 +735,43 @@ header {
 .selected-file-size {
   font-size: 12px;
   color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.duplicate-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.duplicate-badge.same-name {
+  background: #ffe4e4;
+  color: #d63031;
+  border: 1px solid #ffcccc;
+}
+
+[data-theme="dark"] .duplicate-badge.same-name {
+  background: rgba(214, 48, 49, 0.2);
+  color: #ff6b6b;
+  border: 1px solid rgba(214, 48, 49, 0.3);
+}
+
+.duplicate-badge.same-size {
+  background: #fff4e4;
+  color: #e67e22;
+  border: 1px solid #ffe4cc;
+}
+
+[data-theme="dark"] .duplicate-badge.same-size {
+  background: rgba(230, 126, 34, 0.2);
+  color: #ffa940;
+  border: 1px solid rgba(230, 126, 34, 0.3);
 }
 
 .remove-file-btn {
