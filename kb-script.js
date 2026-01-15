@@ -1,17 +1,37 @@
 // Knowledge Base Manager - Client-side Script with Real API Integration
 
-// API Configuration
-const baseURL = 'https://aspect-agent-server-1018338671074.europe-west1.run.app';
-//const baseURL = 'http://localhost:3000'; // Uncomment for local development
-const AGENT_NAME = 'Freeda 2.0';
+// Use configuration from kb-config.js (KB_CONFIG must be loaded first)
+const baseURL = KB_CONFIG.baseURL;
+const AGENT_NAME = KB_CONFIG.agentName;
+
+// Apply configuration to page elements
+function applyConfiguration() {
+  // Set page title
+  document.getElementById('page-title').textContent = KB_CONFIG.pageTitle;
+
+  // Set header elements
+  document.getElementById('header-logo').src = KB_CONFIG.logoSrc;
+  document.getElementById('header-logo').alt = KB_CONFIG.logoAlt;
+  document.getElementById('header-title').innerHTML = KB_CONFIG.headerTitle + '<span class="ai-text" id="header-title-accent">' + KB_CONFIG.headerTitleAccent + '</span>';
+  document.getElementById('header-subtitle').textContent = KB_CONFIG.headerSubtitle;
+
+  // Set stylesheet if different from default
+  if (KB_CONFIG.stylesFile && KB_CONFIG.stylesFile !== 'kb-styles.css') {
+    document.getElementById('kb-stylesheet').href = KB_CONFIG.stylesFile;
+  }
+}
+
+// Apply configuration on load
+applyConfiguration();
 
 // Theme toggle functionality
 const themeToggle = document.getElementById('theme-toggle');
 const sunIcon = document.querySelector('.sun-icon');
 const moonIcon = document.querySelector('.moon-icon');
 
-// Load saved theme
-const currentTheme = localStorage.getItem('theme') || 'light';
+// Load saved theme (using agent-specific storage prefix)
+const themeKey = KB_CONFIG.storagePrefix + 'theme';
+const currentTheme = localStorage.getItem(themeKey) || 'light';
 if (currentTheme === 'dark') {
   document.documentElement.setAttribute('data-theme', 'dark');
   sunIcon.style.display = 'none';
@@ -22,12 +42,12 @@ themeToggle.addEventListener('click', () => {
   const theme = document.documentElement.getAttribute('data-theme');
   if (theme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'light');
-    localStorage.setItem('theme', 'light');
+    localStorage.setItem(themeKey, 'light');
     sunIcon.style.display = 'block';
     moonIcon.style.display = 'none';
   } else {
     document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('theme', 'dark');
+    localStorage.setItem(themeKey, 'dark');
     sunIcon.style.display = 'none';
     moonIcon.style.display = 'block';
   }
@@ -35,7 +55,7 @@ themeToggle.addEventListener('click', () => {
 
 // Back to chat button
 document.getElementById('back-btn').addEventListener('click', () => {
-  window.location.href = 'freeda.html';
+  window.location.href = KB_CONFIG.chatPageUrl;
 });
 
 // Data storage
