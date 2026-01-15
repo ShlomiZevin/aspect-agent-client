@@ -11,6 +11,9 @@ cp *.css public/
 cp *.js public/
 cp -r img public/
 
+# Use Aspect KB config
+cp aspect-kb-config.js public/kb-config.js
+
 echo "✅ Files copied"
 echo "🚀 Deploying to Firebase..."
 
