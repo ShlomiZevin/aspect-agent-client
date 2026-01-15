@@ -1,5 +1,11 @@
 // Aspect Finance BI Assistant - Agent-specific configuration
 
+// Chat History Management
+const historySidebar = document.getElementById('history-sidebar');
+const historyList = document.getElementById('history-list');
+const menuToggleBtn = document.getElementById('menu-toggle-btn');
+const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+
 // Aspect-specific thinking steps
 const aspectThinkingSteps = [
   [
@@ -33,8 +39,8 @@ const aspectThinkingSteps = [
 const aspectAgent = new AgentBase({
   agentName: 'Aspect',
   storagePrefix: 'aspect_',
-  baseURL: 'http://localhost:3000', // Change to production URL when deploying
-  //baseURL: 'https://aspect-agent-server-1018338671074.europe-west1.run.app',
+  //baseURL: 'http://localhost:3000', // Change to production URL when deploying
+  baseURL: 'https://aspect-agent-server-1018338671074.europe-west1.run.app',
   thinkingSteps: aspectThinkingSteps,
   useKnowledgeBase: false
 });
@@ -92,3 +98,77 @@ removeLogoBtn.addEventListener('click', (e) => {
 
   localStorage.removeItem('aspect_client_logo_data');
 });
+
+// ===== CHAT HISTORY SETUP =====
+
+// Welcome HTML for Aspect (used when loading empty chats)
+const aspectWelcomeHtml = `
+  <div class="welcome-section">
+    <div class="welcome-icon">💼</div>
+    <h2>Welcome to your Aspect Assistant</h2>
+    <p>Ask me anything about your business metrics, sales data, inventory, and more.</p>
+
+    <div class="quick-questions">
+      <h3>Quick Questions</h3>
+      <div class="questions-grid">
+        <button class="quick-btn" data-question="What are my total sales this month?">
+          <span class="q-icon">💰</span>
+          <span class="q-text">Sales Overview</span>
+        </button>
+        <button class="quick-btn" data-question="Which product is selling the most?">
+          <span class="q-icon">📈</span>
+          <span class="q-text">Top Products</span>
+        </button>
+        <button class="quick-btn" data-question="Show me branch performance">
+          <span class="q-icon">🏢</span>
+          <span class="q-text">Branch Analysis</span>
+        </button>
+        <button class="quick-btn" data-question="Inventory status report">
+          <span class="q-icon">📦</span>
+          <span class="q-text">Inventory Check</span>
+        </button>
+      </div>
+    </div>
+  </div>
+`;
+
+// Toggle sidebar function
+function toggleSidebar() {
+  aspectAgent.toggleSidebar(historySidebar);
+}
+
+// Render chat history wrapper
+async function renderChatHistory() {
+  await aspectAgent.renderChatHistory(historyList);
+}
+
+// Switch to chat wrapper
+async function switchToChat(chatId) {
+  await aspectAgent.switchToChat(chatId, aspectWelcomeHtml);
+}
+
+// Set callbacks for history management
+aspectAgent.setRenderChatHistoryCallback(renderChatHistory);
+aspectAgent.setSwitchToChatCallback(switchToChat);
+
+// Event listeners for sidebar
+menuToggleBtn.addEventListener('click', toggleSidebar);
+closeSidebarBtn.addEventListener('click', toggleSidebar);
+
+// Override new chat button to create new chat
+aspectAgent.newChatBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  aspectAgent.createNewChat();
+}, true);
+
+// Initialize app with history
+async function initializeApp() {
+  const currentChat = await aspectAgent.getCurrentChat();
+  if (currentChat && currentChat.messages && currentChat.messages.length > 0) {
+    await aspectAgent.loadChatMessages(aspectAgent.conversationId, aspectWelcomeHtml);
+  }
+
+  await renderChatHistory();
+}
+
+initializeApp();
